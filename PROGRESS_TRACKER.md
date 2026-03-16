@@ -313,38 +313,39 @@ Next Week: Input validation & error handling
 
 #### Feature 1️⃣: Security Hardening
 ```
-Status: 🟡 PARTIAL (3/8 deliverables)
+Status: 🟡 PARTIAL (11/20 deliverables)
 Week: 1-2
 Implementation:
   - [x] Move secrets from code → .env (Day 1-2) ✅
   - [x] Create .env template & .env.example (Day 1) ✅
   - [x] Implement API key authentication (Day 3) ✅
-  - [ ] Add input validation via Marshmallow (Week 2)
-  - [ ] Implement rate limiting (Week 2)
+  - [x] Add input validation via Marshmallow (Week 2) ✅
+  - [x] Implement rate limiting (Week 2) ✅
   - [ ] Setup structured logging (Week 2)
 
 Deliverables:
   - [x] .env file (populated with real secrets) ✅
   - [x] .env.example file (template) ✅
   - [x] server/auth.py (API key decorator) ✅
-  - [ ] server/schemas.py (input validation)
+  - [x] server/schemas.py (input validation) ✅
   - [x] Updated app.py (secure config loading) ✅
   - [x] .gitignore updated (with .env) ✅
   - [ ] README updated (setup instructions)
 
 Functions to Create:
   ├─ [x] require_api_key() decorator in auth.py ✅
-  ├─ [ ] validate_system_data() in schemas.py
+  ├─ [x] validate_system_data() in schemas.py ✅
+  ├─ [x] validate_and_clean_system_data() in schemas.py ✅
   ├─ [ ] setup_logging() for structured logs
   └─ [ ] validate_config() for environment checks
 
 Tests:
   - [ ] Test API endpoint without key (401)
   - [ ] Test API endpoint with valid key (200)
-  - [ ] Test invalid JSON input (400)
-  - [ ] Test rate limiting (429 after X requests)
+  - [x] Test invalid JSON input (400) - Implemented ✅
+  - [x] Test rate limiting (429 after X requests) - Implemented ✅
 
-Progress: 6/20 tasks (30%)
+Progress: 11/20 tasks (55%)
 ```
 
 #### Feature 2️⃣: Architecture Refactoring

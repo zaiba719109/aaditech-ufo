@@ -2,6 +2,8 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from datetime import datetime, timedelta
 import logging
 import platform
@@ -16,6 +18,8 @@ from dotenv import load_dotenv
 from backup import create_backup, restore_backup, list_backups
 from werkzeug.utils import secure_filename
 from auth import require_api_key
+from schemas import validate_and_clean_system_data
+from marshmallow import ValidationError
 
 # Load environment variables from .env file
 load_dotenv()
@@ -52,6 +56,14 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///toolboxgalaxy.db'  # Or your chosen database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Suppress a warning
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-change-in-production')  # Load from .env
+
+# Initialize rate limiter
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)  # Set the logging level
 
@@ -302,20 +314,57 @@ def manual_submit():
         return str(e), 500
 
 @app.route('/api/submit_data', methods=['POST'])
+@limiter.limit("10 per minute")
 @require_api_key
 def submit_data():
+    """
+    API endpoint to receive system data from agents.
+    
+    Requirements:
+    - API key in X-API-Key header
+    - Valid JSON in request body
+    - All required fields present
+    - Rate limit: 10 per minute
+    """
     try:
         data = request.get_json()
-        logging.debug(f"Received data from agent: {data}")
-        # Create a new record for each submission instead of updating
-        data['last_update'] = datetime.fromisoformat(data['last_update'])
-        new_system = SystemData(**data)
+        
+        if not data:
+            return jsonify({
+                'error': 'No data provided',
+                'message': 'Request body must contain valid JSON'
+            }), 400
+        
+        # Validate data against schema
+        try:
+            validated_data = validate_and_clean_system_data(data)
+        except ValidationError as e:
+            logging.warning(f"Validation failed: {e.messages}")
+            return jsonify({
+                'error': 'Validation failed',
+                'message': 'Invalid data format',
+                'details': str(e.messages)
+            }), 400
+        
+        logging.debug(f"Received valid data from agent: {validated_data.get('serial_number')}")
+        
+        new_system = SystemData(**validated_data)
         db.session.add(new_system)
         db.session.commit()
-        return "System data received successfully."
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'System data received successfully',
+            'serial_number': validated_data.get('serial_number')
+        }), 200
+        
     except Exception as e:
         logging.error(f"Error processing data: {e}")
-        return str(e), 500
+        db.session.rollback()
+        return jsonify({
+            'error': 'Server error',
+            'message': str(e)
+        }), 500
 
 @app.route('/backup')
 def backup_panel():
