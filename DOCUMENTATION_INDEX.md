@@ -10,8 +10,10 @@
 
 | Goal | Document | Time |
 |------|----------|------|
+| **🎯 IMPLEMENTATION REFERENCE** | [IMPLEMENTATION_REFERENCE_GUIDE.md](IMPLEMENTATION_REFERENCE_GUIDE.md) | 10 min |
 | **See project vision & goals** | [README.md](README.md) (92 features) | 20 min |
 | **Know what to do this week** | [WEEK_BY_WEEK_CHECKLIST.md](WEEK_BY_WEEK_CHECKLIST.md) | 5 min |
+| **Track implementation progress** | [PROGRESS_TRACKER.md](PROGRESS_TRACKER.md) | 5 min |
 | **Understand architecture** | [UPDATED_ARCHITECTURE.md](UPDATED_ARCHITECTURE.md) | 10 min |
 | **See feature details** | [ADVANCED_WINDOWS_TROUBLESHOOTING.md](ADVANCED_WINDOWS_TROUBLESHOOTING.md) | 20 min |
 | **Map all 157 features** | [FEATURE_COVERAGE_MAP.md](FEATURE_COVERAGE_MAP.md) | 10 min |
@@ -21,9 +23,39 @@
 
 ---
 
+## 🎯 FOR IMPLEMENTATION (THE ESSENTIALS)
+
+**During actual development, use only these 6 files:**
+
+| File | Purpose | When | Update |
+|------|---------|------|--------|
+| **IMPLEMENTATION_REFERENCE_GUIDE.md** | 🗺️ File usage map (START HERE FIRST!) | Before any work | Never |
+| **WEEK_BY_WEEK_CHECKLIST.md** | 📋 Today's tasks & step-by-step | Every morning | Weekly (plan) |
+| **PROGRESS_TRACKER.md** | ✅ Track completed functions | After each task | 2-3x daily |
+| **UPDATED_ARCHITECTURE.md** | 🏗️ System design reference | When coding | Rarely |
+| **README.md** | 📚 Feature specifications | When figuring out what a feature does | Rarely |
+| **FEATURE_COVERAGE_MAP.md** | 📍 Feature status dashboard | Weekly review | Weekly |
+
+**Read this first**: [IMPLEMENTATION_REFERENCE_GUIDE.md](IMPLEMENTATION_REFERENCE_GUIDE.md)
+
+---
+
 ## 📁 ACTIVE WORKING DOCUMENTS (Root Level)
 
 ### 🟢 PRIMARY DOCUMENTS
+
+#### 0. **IMPLEMENTATION_REFERENCE_GUIDE.md** (START HERE FOR DEVELOPERS)
+- **Purpose**: Map of which files to read/update during implementation
+- **Contains**:
+  - Quick reference tables (what to read/update)
+  - Implementation workflow steps
+  - File-by-file reference guide
+  - Decision flow (which file answers what question)
+  - Update frequency for each document
+  - How to track progress properly
+- **Audience**: Developers (ESSENTIAL READING)
+- **Update Frequency**: Never (reference only)
+- **Use**: FIRST thing you read when starting implementation
 
 #### 1. **README.md** (THE VISION DOCUMENT - 92 FEATURES)
 - **Purpose**: The comprehensive 92-feature enterprise vision that inspired this project
@@ -53,6 +85,8 @@
 - **Audience**: Everyone (managers, developers, architects)
 - **Update Frequency**: Weekly
 - **Use**: When you need THE complete execution picture
+
+#### 3. **WEEK_BY_WEEK_CHECKLIST.md** (DAILY EXECUTION GUIDE)
 - **Purpose**: Day-to-day implementation tasks
 - **Contains**:
   - Week 1-4 detailed daily checklist
@@ -64,7 +98,20 @@
 - **Update Frequency**: Every Sunday for next week
 - **Use**: Every morning, check what's on today's list
 
-#### 3. **WEEK_BY_WEEK_CHECKLIST.md**
+#### 4. **PROGRESS_TRACKER.md** (IMPLEMENTATION PROGRESS DASHBOARD)
+- **Purpose**: Real-time tracking of development progress
+- **Contains**:
+  - Phase 0 detailed (Weeks 1-4 with daily templates)
+  - Phase-wise feature & function breakdown (all 157 features)
+  - Feature completion matrix (status by phase)
+  - Completion checklist (all 25 weeks)
+  - Progress dashboard (visual bars)
+  - How-to update guide
+- **Audience**: Development team (MOST USED DURING CODING)
+- **Update Frequency**: 2-3 times daily (after each task)
+- **Use**: Track which functions are completed, daily progress
+
+#### 5. **SETUP_GUIDE.md** (LOCAL ENVIRONMENT SETUP)
 - **Purpose**: Quick reference for developers
 - **Contains**:
   - Setup instructions
@@ -80,7 +127,7 @@
 
 ### 🟡 FEATURE & ARCHITECTURE DOCUMENTS
 
-#### 4. **ADVANCED_WINDOWS_TROUBLESHOOTING.md**
+#### 6. **ADVANCED_WINDOWS_TROUBLESHOOTING.md** (65 WINDOWS FEATURES)
 - **Purpose**: Define 65 new Windows troubleshooting features
 - **Contains**:
   - Feature breakdown (Event Logs, Reliability, Crashes, etc.)
@@ -93,7 +140,7 @@
 - **Update Frequency**: Finalized (reference only)
 - **Use**: Understand what troubleshooting features will be built
 
-#### 5. **UPDATED_ARCHITECTURE.md**
+#### 7. **UPDATED_ARCHITECTURE.md**
 - **Purpose**: Complete system architecture with troubleshooting
 - **Contains**:
   - Enhanced system diagrams
@@ -107,7 +154,7 @@
 - **Update Frequency**: When architecture changes
 - **Use**: Understand system design and integration points
 
-#### 6. **FEATURE_COVERAGE_MAP.md**
+#### 8. **FEATURE_COVERAGE_MAP.md**
 - **Purpose**: Map all 157 features to phases/weeks
 - **Contains**:
   - 92 original features (categorized)
@@ -122,9 +169,75 @@
 
 ---
 
-### 🔵 REFERENCE & BACKUP DOCUMENTS
+### ⚙️ CODE & IMPLEMENTATION FILES
 
-#### 7. **README.md**
+These are the actual Python files you will modify during implementation:
+
+#### **server/app.py** (Main Flask Application)
+- **Current**: 338 lines, 10 routes
+- **What you'll do**: 
+  - Add security hardening (Week 1)
+  - Refactor into blueprints (Week 3-4)
+  - Add new API routes for alerts, automation, logs (Week 9-16)
+
+#### **agent/agent.py** (Windows Monitoring Agent)
+- **Current**: 150 lines
+- **What you'll do**:
+  - Add Windows Event Logs collection (Week 13)
+  - Add Reliability history collection (Week 15)
+  - Add Driver monitoring (Week 14)
+  - Add Crash analysis (Week 15)
+
+#### **server/models.py** (Database Models)
+- **Current**: Basic system monitoring model
+- **What you'll do**:
+  - Add Alert models (Week 9)
+  - Add Automation models (Week 11)
+  - Add User/RBAC models (Week 6)
+  - Add Windows Event models (Week 13-15)
+
+#### **server/forms.py** (Input Validation)
+- **Current**: 73 lines
+- **What you'll do**:
+  - Add validation for all new API endpoints (Week 9-16)
+
+#### **server/config.py** (Configuration Management)
+- **Current**: Basic config
+- **What you'll do**:
+  - Add environment-based configuration (Week 4)
+  - Add Redis/Celery config (Week 8)
+  - Add LLM/Ollama config (Week 16)
+
+#### **NEW FILES YOU'LL CREATE**
+```
+server/
+├─ auth.py                  (Created Week 1: API key authentication)
+├─ schemas.py               (Created Week 1: Input validation with Marshmallow)
+├─ extensions.py            (Created Week 3: Flask db, migrate, Redis)
+├─ blueprints/
+│  ├─ web.py               (Created Week 3: Web routes)
+│  └─ api.py               (Created Week 8: API routes)
+├─ services/
+│  ├─ system_service.py    (Created Week 3: System monitoring logic)
+│  ├─ backup_service.py    (Created Week 3: Backup/restore logic)
+│  ├─ alert_service.py     (Created Week 9: Alert logic)
+│  ├─ automation_service.py (Created Week 11: Automation logic)
+│  └─ windows_service.py   (Created Week 13: Windows monitoring logic)
+└─ tests/
+   ├─ test_api.py          (Created Week 4: API tests)
+   ├─ test_auth.py         (Created Week 1: Auth tests)
+   └─ test_services.py     (Created Week 4: Service tests)
+
+migrations/                 (Created Week 4: Database migrations)
+├─ versions/
+│  └─ 001_initial_schema.py
+```
+
+---
+
+### 🔗 REFERENCE & SUPPORT DOCUMENTS
+
+#### 9. **REMOVED_FEATURES.md**
 - **Purpose**: User-facing project documentation
 - **Contains**:
   - Project overview
@@ -137,7 +250,7 @@
 - **Update Frequency**: Every sprint
 - **Use**: Deployment instructions & user guide
 
-#### 8. **REMOVED_FEATURES.md**
+#### 9. **REMOVED_FEATURES.md**
 - **Purpose**: Track features removed from original scope
 - **Contains**:
   - 19+ features documented but not implemented
