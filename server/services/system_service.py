@@ -184,6 +184,30 @@ class SystemService:
         return datetime.now(ist)
     
     @staticmethod
+    def get_local_system_data():
+        """
+        Collect local system data from the server machine.
+        
+        Returns:
+            dict: System data including hardware info, metrics, benchmarks
+        """
+        try:
+            system_info = SystemService.get_system_info()
+            performance_metrics = SystemService.get_performance_metrics()
+            benchmark_results = SystemService.get_benchmark_results()
+            
+            return {
+                **system_info,
+                **performance_metrics,
+                **benchmark_results,
+                "last_update": SystemService.get_current_time(),
+                "status": "active"
+            }
+        except Exception as e:
+            logger.error(f"Error collecting local system data: {e}")
+            return {}
+    
+    @staticmethod
     def is_active(last_update, now):
         """
         Check if system is active based on last update time.

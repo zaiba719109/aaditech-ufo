@@ -75,6 +75,23 @@ def ist_format(value):
     
     return value.strftime('%d-%m-%Y %I:%M:%S %p')
 
+
+@app.context_processor
+def inject_template_globals():
+    """
+    Inject global variables and functions into all templates.
+    
+    Makes the following available in Jinja2 templates:
+    - is_active(last_update, now): Check if system is active
+    - get_current_time(): Get current time in IST
+    """
+    from .services import SystemService
+    
+    return {
+        'is_active': SystemService.is_active,
+        'current_time': SystemService.get_current_time
+    }
+
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):

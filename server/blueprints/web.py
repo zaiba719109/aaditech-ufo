@@ -4,10 +4,12 @@ Web UI routes for dashboard and management
 """
 
 import logging
+import os
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
+from werkzeug.utils import secure_filename
 from ..models import db, SystemData
 from ..extensions import limiter
-from ..services import SystemService
+from ..services import SystemService, BackupService
 
 logger = logging.getLogger(__name__)
 
@@ -194,4 +196,163 @@ def get_system(system_id):
         return jsonify({
             'success': False,
             'error': str(e)
+        }), 500
+
+
+@web_bp.route('/manual_submit', methods=['POST'])
+@limiter.limit("30 per minute")
+def manual_submit():
+    """
+    Manually submit or update local system data.
+    
+    This endpoint collects current system metrics and submits them to the database.
+    Useful for immediate data refresh without waiting for agent submission.
+    
+    Returns:
+        - 200: Success with message
+        - 500: Server error
+    """
+    try:
+        # Get local system data
+        data = SystemService.get_local_system_data()
+        
+        if not data:
+            logger.warning("No system data collected")
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to collect system data'
+            }), 500
+        
+        # Check if system already exists
+        existing_system = SystemData.query.filter_by(
+            serial_number=data.get('serial_number')
+        ).first()
+        
+        if existing_system:
+            # Update existing record
+            for key, value in data.items():
+                if hasattr(existing_system, key):
+                    setattr(existing_system, key, value)
+            db.session.commit()
+            logger.info(f"Updated system data: {data.get('hostname')}")
+            return jsonify({
+                'status': 'success',
+                'message': 'Local system data updated successfully',
+                'system_id': existing_system.id
+            }), 200
+        else:
+            # Create new record
+            new_system = SystemData(**data)
+            db.session.add(new_system)
+            db.session.commit()
+            logger.info(f"Submitted system data: {data.get('hostname')}")
+            return jsonify({
+                'status': 'success',
+                'message': 'Local system data submitted successfully',
+                'system_id': new_system.id
+            }), 200
+    
+    except Exception as e:
+        logger.error(f"Error processing manual submission: {e}", exc_info=True)
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@web_bp.route('/backup/create', methods=['POST'])
+@limiter.limit("5 per minute")
+def create_backup_route():
+    """
+    Create a database backup.
+    
+    Returns:
+        - 200: Success with backup details
+        - 500: Server error
+    """
+    try:
+        # Get database path
+        db_path = os.path.join(
+            os.path.dirname(__file__),
+            '..',
+            'toolboxgalaxy.db'
+        )
+        
+        result = BackupService.create_backup(db_path)
+        
+        if result.get('success'):
+            logger.info(f"Backup created: {result.get('backup_filename')}")
+            return jsonify({
+                'status': 'success',
+                'message': f"Backup created: {result.get('backup_filename')}",
+                'backup_info': result
+            }), 200
+        else:
+            logger.error(f"Backup creation failed: {result.get('error')}")
+            return jsonify({
+                'status': 'error',
+                'message': result.get('error')
+            }), 500
+    
+    except Exception as e:
+        logger.error(f"Error creating backup: {e}", exc_info=True)
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@web_bp.route('/backup/restore/<filename>', methods=['POST'])
+@limiter.limit("5 per minute")
+def restore_backup_route(filename):
+    """
+    Restore database from a backup.
+    
+    Args:
+        filename: Backup filename to restore from
+    
+    Returns:
+        - 200: Success with restoration details
+        - 404: Backup not found
+        - 500: Server error
+    """
+    try:
+        # Secure the filename
+        safe_filename = secure_filename(filename)
+        
+        # Construct backup path
+        backup_path = os.path.join(
+            BackupService.BACKUP_DIR,
+            safe_filename
+        )
+        
+        # Get database path
+        db_path = os.path.join(
+            os.path.dirname(__file__),
+            '..',
+            'toolboxgalaxy.db'
+        )
+        
+        result = BackupService.restore_backup(backup_path, db_path)
+        
+        if result.get('success'):
+            logger.info(f"Backup restored: {safe_filename}")
+            return jsonify({
+                'status': 'success',
+                'message': 'Database restored successfully',
+                'backup_info': result
+            }), 200
+        else:
+            logger.error(f"Backup restoration failed: {result.get('error')}")
+            return jsonify({
+                'status': 'error',
+                'message': result.get('error')
+            }), 500 if result.get('error') else 404
+    
+    except Exception as e:
+        logger.error(f"Error restoring backup: {e}", exc_info=True)
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
         }), 500
