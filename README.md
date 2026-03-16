@@ -6,6 +6,21 @@
 
 ---
 
+## 🎯 IMPORTANT: START HERE!
+
+### For Implementation Planning:
+👉 **[MASTER_ROADMAP.md](MASTER_ROADMAP.md)** ← Single source of truth for 25-week platform development
+
+**Quick Navigation**:
+- 📅 **Weekly Tasks**: [WEEK_BY_WEEK_CHECKLIST.md](WEEK_BY_WEEK_CHECKLIST.md)
+- ⚡ **Quick Start**: [QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)
+- 🏗️ **Architecture**: [UPDATED_ARCHITECTURE.md](UPDATED_ARCHITECTURE.md)
+- 🪟 **Windows Features**: [ADVANCED_WINDOWS_TROUBLESHOOTING.md](ADVANCED_WINDOWS_TROUBLESHOOTING.md)
+- 📊 **Feature Map**: [FEATURE_COVERAGE_MAP.md](FEATURE_COVERAGE_MAP.md)
+- 📚 **Reference Docs**: [ARCHIVE/](ARCHIVE/) (detailed analysis & history)
+
+---
+
 ## 📋 Table of Contents
 
 1. [Overview](#overview)
