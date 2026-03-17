@@ -5,8 +5,11 @@ Main Flask Application
 
 import os
 import logging
+import time
+import uuid
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, g
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Load environment variables
 load_dotenv()
@@ -25,8 +28,49 @@ app = Flask(__name__)
 from .config import get_config
 app.config.from_object(get_config())
 
+if app.config.get('ENABLE_PROXY_FIX', True):
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=app.config.get('PROXY_FIX_X_FOR', 1),
+        x_proto=app.config.get('PROXY_FIX_X_PROTO', 1),
+        x_host=app.config.get('PROXY_FIX_X_HOST', 1),
+        x_port=app.config.get('PROXY_FIX_X_PORT', 1),
+        x_prefix=app.config.get('PROXY_FIX_X_PREFIX', 1),
+    )
+
 from .tenant_context import init_tenant_context
 init_tenant_context(app)
+
+from .auth import init_auth_context
+init_auth_context(app)
+
+from .queue import init_queue
+init_queue(app)
+
+
+@app.before_request
+def bind_request_context_headers():
+    """Bind gateway-friendly request metadata to request context."""
+    from flask import request
+
+    g.request_started_at = time.time()
+    g.request_id = request.headers.get('X-Request-ID') or str(uuid.uuid4())
+
+
+@app.after_request
+def apply_gateway_response_headers(response):
+    """Add traceability and transformation headers for gateway compatibility."""
+    request_id = getattr(g, 'request_id', None)
+    if request_id:
+        response.headers['X-Request-ID'] = request_id
+
+    started_at = getattr(g, 'request_started_at', None)
+    if started_at is not None:
+        elapsed_ms = int((time.time() - started_at) * 1000)
+        response.headers['X-Response-Time-Ms'] = str(elapsed_ms)
+
+    response.headers['X-API-Gateway-Ready'] = 'true'
+    return response
 
 # Initialize extensions with app
 from .extensions import init_extensions, db, migrate, limiter
@@ -85,7 +129,10 @@ def inject_template_globals():
     
     return {
         'is_active': SystemService.is_active,
-        'current_time': SystemService.get_current_time
+        'current_time': SystemService.get_current_time,
+        'current_user': getattr(g, 'current_user', None),
+        'current_tenant': getattr(g, 'tenant', None),
+        'is_authenticated': getattr(g, 'current_user', None) is not None,
     }
 
 # Error handlers

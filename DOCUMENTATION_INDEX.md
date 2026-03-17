@@ -1,6 +1,6 @@
 # 📚 AADITECH UFO - DOCUMENTATION INDEX
 
-**Guide to All Project Documentation** | Updated March 16, 2026
+**Guide to All Project Documentation** | Updated March 16, 2026 for Phase 1 auth and tenant milestone sync
 
 ---
 
@@ -18,7 +18,7 @@
 | **See feature details** | [ADVANCED_WINDOWS_TROUBLESHOOTING.md](ADVANCED_WINDOWS_TROUBLESHOOTING.md) | 20 min |
 | **Map all 157 features** | [FEATURE_COVERAGE_MAP.md](FEATURE_COVERAGE_MAP.md) | 10 min |
 | **Weekly tasks** | [WEEK_BY_WEEK_CHECKLIST.md](WEEK_BY_WEEK_CHECKLIST.md) | 5 min |
-| **Setup & install** (current state) | [ARCHIVE/README_CURRENT_STATE.md](ARCHIVE/README_CURRENT_STATE.md) | 10 min |
+| **See the older baseline snapshot** | [ARCHIVE/README_CURRENT_STATE.md](ARCHIVE/README_CURRENT_STATE.md) | 10 min |
 | **Deep dive analysis** | [ARCHIVE/](ARCHIVE/) | 30 min |
 
 ---
@@ -58,7 +58,7 @@
 - **Use**: FIRST thing you read when starting implementation
 
 #### 1. **README.md** (THE VISION DOCUMENT - 92 FEATURES)
-- **Purpose**: The comprehensive 92-feature enterprise vision that inspired this project
+- **Purpose**: The comprehensive 92-feature enterprise vision, prefaced with the current implementation milestone summary
 - **Contains**:
   - Project overview and goals
   - All major platform capabilities
@@ -101,11 +101,11 @@
 #### 4. **PROGRESS_TRACKER.md** (IMPLEMENTATION PROGRESS DASHBOARD)
 - **Purpose**: Real-time tracking of development progress
 - **Contains**:
-  - Phase 0 detailed (Weeks 1-4 with daily templates)
+  - Current milestone summary for delivered Phase 0 and Phase 1 work
   - Phase-wise feature & function breakdown (all 157 features)
   - Feature completion matrix (status by phase)
   - Completion checklist (all 25 weeks)
-  - Progress dashboard (visual bars)
+  - Progress dashboard (qualitative delivery status)
   - How-to update guide
 - **Audience**: Development team (MOST USED DURING CODING)
 - **Update Frequency**: 2-3 times daily (after each task)
@@ -174,11 +174,11 @@
 These are the actual Python files you will modify during implementation:
 
 #### **server/app.py** (Main Flask Application)
-- **Current**: 338 lines, 10 routes
-- **What you'll do**: 
-  - Add security hardening (Week 1)
-  - Refactor into blueprints (Week 3-4)
-  - Add new API routes for alerts, automation, logs (Week 9-16)
+- **Current**: App factory, blueprint registration, tenant context, auth context, and template globals
+- **What you'll do next**: 
+  - Extend feature routes for later phases
+  - Keep auth and tenant bootstrap aligned with new modules
+  - Add future alerting, automation, and AI integration points
 
 #### **agent/agent.py** (Windows Monitoring Agent)
 - **Current**: 150 lines
@@ -189,48 +189,53 @@ These are the actual Python files you will modify during implementation:
   - Add Crash analysis (Week 15)
 
 #### **server/models.py** (Database Models)
-- **Current**: Basic system monitoring model
-- **What you'll do**:
-  - Add Alert models (Week 9)
-  - Add Automation models (Week 11)
-  - Add User/RBAC models (Week 6)
-  - Add Windows Event models (Week 13-15)
+- **Current**: System monitoring plus Organization, User, Role, Permission, and RevokedToken models
+- **What you'll do next**:
+  - Add alerting models (Phase 2)
+  - Add automation models (Phase 2)
+  - Add Windows troubleshooting models (Phase 2)
 
 #### **server/forms.py** (Input Validation)
-- **Current**: 73 lines
-- **What you'll do**:
-  - Add validation for all new API endpoints (Week 9-16)
+- **Current**: Minimal validation surface; more schemas are still needed
+- **What you'll do next**:
+  - Expand validation coverage for new API endpoints in later phases
 
 #### **server/config.py** (Configuration Management)
-- **Current**: Basic config
-- **What you'll do**:
-  - Add environment-based configuration (Week 4)
+- **Current**: Environment-based Flask config plus session and JWT settings
+- **What you'll do next**:
   - Add Redis/Celery config (Week 8)
   - Add LLM/Ollama config (Week 16)
 
-#### **NEW FILES YOU'LL CREATE**
+#### **KEY FILES ADDED DURING PHASE 0-1**
 ```
 server/
-├─ auth.py                  (Created Week 1: API key authentication)
-├─ schemas.py               (Created Week 1: Input validation with Marshmallow)
-├─ extensions.py            (Created Week 3: Flask db, migrate, Redis)
+├─ auth.py                  (API key auth, JWT auth, browser session auth, RBAC decorators)
+├─ schemas.py               (Validation support)
+├─ extensions.py            (Flask db, migrate, limiter)
 ├─ blueprints/
-│  ├─ web.py               (Created Week 3: Web routes)
-│  └─ api.py               (Created Week 8: API routes)
+│  ├─ web.py               (Browser routes, login/logout, protected UI actions)
+│  └─ api.py               (Tenant admin and JWT auth APIs plus ingestion routes)
 ├─ services/
-│  ├─ system_service.py    (Created Week 3: System monitoring logic)
-│  ├─ backup_service.py    (Created Week 3: Backup/restore logic)
-│  ├─ alert_service.py     (Created Week 9: Alert logic)
-│  ├─ automation_service.py (Created Week 11: Automation logic)
-│  └─ windows_service.py   (Created Week 13: Windows monitoring logic)
-└─ tests/
-   ├─ test_api.py          (Created Week 4: API tests)
-   ├─ test_auth.py         (Created Week 1: Auth tests)
-   └─ test_services.py     (Created Week 4: Service tests)
+│  ├─ system_service.py    (System monitoring logic)
+│  ├─ backup_service.py    (Backup/restore logic)
+│  ├─ alert_service.py     (planned for Phase 2)
+│  ├─ automation_service.py (planned for Phase 2)
+│  └─ windows_service.py   (planned for Phase 2)
 
-migrations/                 (Created Week 4: Database migrations)
+tests/
+├─ test_tenant_context.py
+├─ test_tenant_admin_api.py
+├─ test_rbac_models.py
+├─ test_auth_jwt_rbac.py
+├─ test_web_management_rbac.py
+└─ test_web_session_auth.py
+
+migrations/                 (Initial and follow-up schema migrations)
 ├─ versions/
-│  └─ 001_initial_schema.py
+│  ├─ 001_initial_schema.py
+│  ├─ 002_multi_tenant.py
+│  ├─ 003_rbac_models.py
+│  └─ 004_jwt_revoked_tokens.py
 ```
 
 ---
@@ -272,7 +277,7 @@ All detailed analysis, decision matrices, supporting documents, and implementati
 
 ```
 ARCHIVE/
-├─ README_CURRENT_STATE.md           - Snapshot of 14 current features (implementation at time of move)
+├─ README_CURRENT_STATE.md           - Older baseline snapshot with a current-state note at the top
 ├─ AUDIT_REPORT.md                   - Deep security audit
 ├─ AUDIT_SUMMARY.md                  - Audit executive summary
 ├─ IMPLEMENTATION_SUMMARY.md          - Consolidated into MASTER_ROADMAP
@@ -501,8 +506,8 @@ PRIORITY 5 (Historical/Reference - rarely update):
 
 ---
 
-**Version**: 1.0
+**Version**: 1.1
 **Last Updated**: March 16, 2026  
-**Status**: 🟢 All documentation consolidated & organized  
+**Status**: 🟢 Documentation aligned to the current Phase 1 milestone  
 
 **🎉 No more confusion. Everything in one place. Let's build!** 🚀

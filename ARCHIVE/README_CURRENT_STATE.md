@@ -4,6 +4,8 @@
 **Latest Version**: 1.0.0-pre-alpha  
 **Last Updated**: March 16, 2026
 
+> Historical note: this file started as the pre-Phase-1 implementation snapshot. The current codebase now also includes multi-tenant isolation, tenant admin APIs, JWT auth, RBAC enforcement, and browser session auth for HTML pages. For live status, use [PROGRESS_TRACKER.md](../PROGRESS_TRACKER.md) and [FEATURE_COVERAGE_MAP.md](../FEATURE_COVERAGE_MAP.md).
+
 ---
 
 ## 🎯 IMPORTANT: START HERE!
@@ -78,6 +80,11 @@ The platform consists of:
 - Historical data tracking
 - Performance benchmarking
 - Database backup/restore functionality
+- Multi-organization data isolation
+- Tenant administration APIs
+- JWT register/login/refresh/logout/me flows
+- Role and permission models with protected routes
+- Browser-compatible login/logout for HTML pages
 - Responsive web interface
 
 #### Dashboard Features
@@ -89,8 +96,6 @@ The platform consists of:
 
 ### 🔄 Planned Features (Future Releases)
 
-- **Authentication System**: User login and role-based access control
-- **API Authentication**: JWT-based API security
 - **Real-time Updates**: WebSocket support for live dashboards
 - **Data Export**: CSV/PDF export functionality
 - **AI Analytics**: Machine learning-based anomaly detection
@@ -107,8 +112,8 @@ The following features mentioned in historical documentation are **NOT currently
 - ❌ Intelligent Alerting System
 - ❌ Automation Engine
 - ❌ Self-Healing Infrastructure
-- ❌ Multi-Tenant SaaS Architecture
-- ❌ Role-Based Access Control
+- ❌ Full transport-layer HTTPS/TLS deployment hardening
+- ❌ Audit logging coverage across the platform
 
 **Note**: These features may be added in future enterprise versions.
 

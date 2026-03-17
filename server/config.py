@@ -33,6 +33,21 @@ class Config:
     # Rate limiting
     RATELIMIT_STORAGE_URL = os.getenv('REDIS_URL', 'memory://')
     RATELIMIT_DEFAULT = '200/day,50/hour'
+
+    # Redis + queue (Phase 1 Week 8 foundation)
+    REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', REDIS_URL)
+    CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', REDIS_URL)
+    QUEUE_ENABLE_BEAT = os.getenv('QUEUE_ENABLE_BEAT', 'True').lower() == 'true'
+    AUDIT_RETENTION_DAYS = int(os.getenv('AUDIT_RETENTION_DAYS', '90'))
+
+    # API gateway readiness
+    ENABLE_PROXY_FIX = os.getenv('ENABLE_PROXY_FIX', 'True').lower() == 'true'
+    PROXY_FIX_X_FOR = int(os.getenv('PROXY_FIX_X_FOR', '1'))
+    PROXY_FIX_X_PROTO = int(os.getenv('PROXY_FIX_X_PROTO', '1'))
+    PROXY_FIX_X_HOST = int(os.getenv('PROXY_FIX_X_HOST', '1'))
+    PROXY_FIX_X_PORT = int(os.getenv('PROXY_FIX_X_PORT', '1'))
+    PROXY_FIX_X_PREFIX = int(os.getenv('PROXY_FIX_X_PREFIX', '1'))
     
     # API Security
     API_KEY_HEADER = 'X-API-Key'
@@ -44,6 +59,23 @@ class Config:
     
     # Agent configuration
     AGENT_API_KEY = os.getenv('AGENT_API_KEY', 'default-key-change-this')
+
+    # JWT configuration (Week 6)
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)
+    JWT_ALGORITHM = os.getenv('JWT_ALGORITHM', 'HS256')
+    JWT_ACCESS_TOKEN_EXPIRES_MINUTES = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES_MINUTES', '30'))
+    JWT_REFRESH_TOKEN_EXPIRES_MINUTES = int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES_MINUTES', str(60 * 24 * 7)))
+
+    # Alert notification settings (Phase 2 Week 9-10)
+    ALERT_EMAIL_ENABLED = os.getenv('ALERT_EMAIL_ENABLED', 'False').lower() == 'true'
+    ALERT_EMAIL_FROM = os.getenv('ALERT_EMAIL_FROM', 'alerts@aaditech.local')
+    ALERT_EMAIL_TO = os.getenv('ALERT_EMAIL_TO', '')
+    ALERT_SMTP_HOST = os.getenv('ALERT_SMTP_HOST', 'localhost')
+    ALERT_SMTP_PORT = int(os.getenv('ALERT_SMTP_PORT', '25'))
+    ALERT_WEBHOOK_ENABLED = os.getenv('ALERT_WEBHOOK_ENABLED', 'False').lower() == 'true'
+    ALERT_WEBHOOK_URL = os.getenv('ALERT_WEBHOOK_URL', '')
+    ALERT_NOTIFICATION_EMAIL_RETRIES = int(os.getenv('ALERT_NOTIFICATION_EMAIL_RETRIES', '2'))
+    ALERT_NOTIFICATION_WEBHOOK_RETRIES = int(os.getenv('ALERT_NOTIFICATION_WEBHOOK_RETRIES', '2'))
     
     # Backup configuration
     BACKUP_DIR = os.getenv('BACKUP_DIR', 'backups/')

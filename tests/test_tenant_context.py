@@ -62,8 +62,14 @@ def test_system_list_is_tenant_scoped(client, app_fixture):
         db.session.add(SystemData(serial_number='B-1', hostname='b-host', organization_id=org_b.id))
         db.session.commit()
 
-    response_a = client.get('/api/systems', headers={'X-Tenant-Slug': 'tenant-a'})
-    response_b = client.get('/api/systems', headers={'X-Tenant-Slug': 'tenant-b'})
+    response_a = client.get(
+        '/api/systems',
+        headers={'X-API-Key': get_api_key(), 'X-Tenant-Slug': 'tenant-a'}
+    )
+    response_b = client.get(
+        '/api/systems',
+        headers={'X-API-Key': get_api_key(), 'X-Tenant-Slug': 'tenant-b'}
+    )
 
     assert response_a.status_code == 200
     assert response_b.status_code == 200

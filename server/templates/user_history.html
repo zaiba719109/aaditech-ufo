@@ -3,6 +3,9 @@
 {% block title %}User History{% endblock %}
 
 {% block content %}
+{% if not system_data %}
+<div class="alert alert-info">No historical data is available for this tenant yet.</div>
+{% else %}
 <h2>System Benchmarks - User History</h2>
 <h3>System Details</h3>
 <p>Serial Number: {{ system_data[0].serial_number }}</p>
@@ -66,7 +69,7 @@
                 <td>{{ data.software_benchmark }}</td>
                 <td>{{ data.hardware_benchmark }}</td>
                 <td>{{ data.overall_benchmark }}</td>
-                <td class="{{ 'active' if data.last_update|is_active(now) else 'inactive' }}">
+                <td class="{{ 'active' if is_active(data.last_update, now) else 'inactive' }}">
                     {{ data.status }}
                 </td>
             </tr>
@@ -132,4 +135,5 @@
         color: red;
     }
 </style>
+{% endif %}
 {% endblock %}

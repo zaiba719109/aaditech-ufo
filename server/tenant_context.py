@@ -1,6 +1,6 @@
 """Tenant context middleware and helpers for multi-tenant request scoping."""
 
-from flask import current_app, g, request
+from flask import current_app, g, request, session
 from .extensions import db
 from .models import Organization
 
@@ -31,6 +31,12 @@ def resolve_request_tenant() -> Organization:
     requested_slug = request.headers.get(_tenant_header_name(), '').strip().lower()
     if requested_slug:
         tenant = Organization.query.filter_by(slug=requested_slug, is_active=True).first()
+        if tenant:
+            return tenant
+
+    session_slug = session.get('web_tenant_slug', '').strip().lower()
+    if session_slug:
+        tenant = Organization.query.filter_by(slug=session_slug, is_active=True).first()
         if tenant:
             return tenant
 

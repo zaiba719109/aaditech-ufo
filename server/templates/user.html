@@ -3,6 +3,11 @@
 {% block title %}User Panel{% endblock %}
 
 {% block content %}
+{% if not system_data %}
+<div class="alert alert-info">
+    No system data is available for this tenant yet. Use Manual Submit or wait for an agent upload.
+</div>
+{% else %}
 <style>
     .metric-box {
         padding: 15px;
@@ -227,70 +232,5 @@
         .catch(error => console.error('Error:', error));
     }
 </script>
+{% endif %}
 {% endblock %}
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Panel</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-4">
-        <h1>System Details</h1>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">System Information</h5>
-                        <p><strong>Hostname:</strong> {{ system_data.hostname }}</p>
-                        <p><strong>Serial Number:</strong> {{ system_data.serial_number }}</p>
-                        <p><strong>Model:</strong> {{ system_data.model_number }}</p>
-                        <p><strong>Current User:</strong> {{ system_data.current_user }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Network Information</h5>
-                        <p><strong>Local IP:</strong> {{ system_data.local_ip }}</p>
-                        <p><strong>Public IP:</strong> {{ system_data.public_ip }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">CPU</h5>
-                        <p><strong>Usage:</strong> {{ "%.1f"|format(system_data.cpu_usage) }}%</p>
-                        <p><strong>Info:</strong> {{ system_data.cpu_info }}</p>
-                        <p><strong>Cores/Threads:</strong> {{ system_data.cpu_cores }}/{{ system_data.cpu_threads }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Memory</h5>
-                        <p><strong>RAM Usage:</strong> {{ "%.1f"|format(system_data.ram_usage) }}%</p>
-                        <p><strong>Storage Usage:</strong> {{ "%.1f"|format(system_data.storage_usage) }}%</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Benchmarks</h5>
-                        <p><strong>Software:</strong> {{ "%.1f"|format(system_data.software_benchmark) }}</p>
-                        <p><strong>Hardware:</strong> {{ "%.1f"|format(system_data.hardware_benchmark) }}</p>
-                        <p><strong>Overall:</strong> {{ "%.1f"|format(system_data.overall_benchmark) }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>

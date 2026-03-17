@@ -134,12 +134,74 @@
             Current Time (IST): {{ current_time().strftime('%d-%m-%Y %I:%M:%S %p') }}
         </div>
         <nav>
-            <a href="{{ url_for('admin_panel') }}">Admin</a> |
-            <a href="{{ url_for('backup_panel') }}">Backup</a>
+            {% if is_authenticated %}
+            <a href="{{ url_for('web.index') }}">Dashboard</a> |
+            <a href="{{ url_for('web.user') }}">User</a> |
+            <a href="{{ url_for('web.history') }}">History</a> |
+            <a href="{{ url_for('web.admin') }}">Admin</a> |
+            <a href="{{ url_for('web.backup') }}">Backup</a> |
+            <a href="{{ url_for('web.logout') }}">Logout</a>
+            {% else %}
+            <a href="{{ url_for('web.login') }}">Login</a>
+            {% endif %}
         </nav>
+        {% if is_authenticated and current_user %}
+        <div>
+            Signed in as {{ current_user.full_name }} ({{ current_user.email }})
+            {% if current_tenant %}| Tenant: {{ current_tenant.slug }}{% endif %}
+        </div>
+        {% endif %}
     </header>
     <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' if category == 'success' else 'info' }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
+        {% if total_systems is defined and active_systems is defined %}
+        <div class="dashboard-grid mt-4">
+            <div class="dashboard-card">
+                <div class="metric-label">Total Systems</div>
+                <div class="metric-value">{{ total_systems }}</div>
+            </div>
+            <div class="dashboard-card">
+                <div class="metric-label">Active Systems</div>
+                <div class="metric-value">{{ active_systems }}</div>
+            </div>
+            {% if systems %}
+            <div class="dashboard-card full-width">
+                <h3>Recent Systems</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Hostname</th>
+                            <th>Serial Number</th>
+                            <th>Last Update</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for system in systems %}
+                        <tr>
+                            <td>{{ system.hostname or 'N/A' }}</td>
+                            <td>{{ system.serial_number or 'N/A' }}</td>
+                            <td>{{ system.last_update|ist_format }}</td>
+                            <td>{{ system.status or 'unknown' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
     <footer>
         <p>&copy; UFOMOVIEZ IT Team 2025. All rights reserved.</p>

@@ -16,6 +16,39 @@ Use:         add_new_code() → remove_old_code() → VERIFY
 
 ---
 
+## PRE-FLIGHT GATES (MANDATORY BEFORE ANY REFACTOR)
+
+- [ ] Create a short refactor ticket with scope and non-goals
+- [ ] Freeze feature work in touched files for the refactor window
+- [ ] Confirm current branch is green (tests + app startup)
+- [ ] Capture baseline metrics:
+  - [ ] Existing test pass count
+  - [ ] Startup success command output
+  - [ ] Key endpoint smoke check results
+- [ ] Define rollback trigger (example: 1 critical route fails)
+
+If any gate fails, refactor does not start.
+
+---
+
+## RISK CLASSIFICATION (CHOOSE STRATEGY FIRST)
+
+### Low Risk
+- Pure rename/move, no behavior change
+- Strategy: single PR, full test run
+
+### Medium Risk
+- Shared module extraction, import rewiring
+- Strategy: split commits + targeted integration tests
+
+### High Risk
+- DB schema changes, auth/security flow, request lifecycle
+- Strategy: two-phase rollout + rollback script + staged validation
+
+Rule: If risk is High, do not combine with unrelated cleanup.
+
+---
+
 ## STEP-BY-STEP ALGORITHM
 
 ### Phase 1: AUDIT (Never skip this!)
@@ -60,8 +93,7 @@ REMOVED CODE MAPPING:
 ### Phase 3: UPDATE ALL REFERENCES
 - [ ] Find all places that import/use old code
   ```bash
-  grep -r "from old_location import" --include="*.py"
-  grep -r "old_location.function" --include="*.py"
+  rg "from old_location import|old_location\.function" -g "*.py"
   ```
 - [ ] Update each reference to use new location
 - [ ] Test each change immediately after updating
@@ -89,12 +121,19 @@ REMOVED CODE MAPPING:
   ```
 - [ ] Test all routes/endpoints:
   ```bash
-  flask test  # or pytest server/tests/
+  pytest tests/ -q
   ```
 - [ ] Verify old code can still be found (before deletion):
   ```bash
-  grep -n "def get_local_system_data" server/app.py
+  rg "def get_local_system_data" server/app.py
   ```
+
+### Phase 4.5: BEHAVIOR PARITY CHECK (NEW)
+- [ ] Compare old vs new output for representative inputs
+- [ ] Validate error codes/messages did not regress
+- [ ] Validate performance did not degrade beyond threshold
+  - Example threshold: response time increase <= 10%
+- [ ] Validate logging/audit events still emitted
 
 ---
 
@@ -103,6 +142,11 @@ REMOVED CODE MAPPING:
   - [ ] Delete old code from old location
   - [ ] Run tests again to confirm nothing broke
   - [ ] Commit: "CLEANUP: Remove old code from original location"
+
+Important:
+- Keeping duplicate old code for long-term "just in case" is not safe.
+- It causes split logic, hidden drift, and future bugs.
+- Use rollback strategy instead of permanent duplication.
 
 **ONLY NOW do you remove!**
 
@@ -116,10 +160,57 @@ REMOVED CODE MAPPING:
   ```
 - [ ] All imports are correct
 - [ ] No broken imports or missing functions
+- [ ] Smoke test critical routes manually or via script
+- [ ] Confirm migrations (if any) are reversible
 - [ ] Commit message explains:
   - What was moved
   - Where it is now
   - Why it was moved
+
+---
+
+## DATABASE REFACTOR SAFETY (IF SCHEMA CHANGES)
+
+Use two-phase schema rollout:
+
+1) Expand phase
+- Add nullable column/table/index
+- Deploy and backfill data
+- Keep old readers/writers working
+
+2) Contract phase
+- Switch code paths to new schema
+- Remove old column/paths only after verification
+
+Checklist:
+- [ ] Backup verified before migration
+- [ ] Upgrade tested
+- [ ] Downgrade tested
+- [ ] Data backfill validated by counts
+
+---
+
+## ROLLBACK PLAYBOOK (MUST EXIST BEFORE HIGH-RISK REFACTOR)
+
+- [ ] Define rollback command(s)
+- [ ] Define rollback owner
+- [ ] Define max rollback time (example: 15 min)
+- [ ] Keep pre-refactor tag/commit reference
+
+Example:
+```bash
+git tag pre-refactor-safe-point
+# rollback reference: pre-refactor-safe-point
+```
+
+---
+
+## OBSERVABILITY CHECKS AFTER REFACTOR
+
+- [ ] Error rate unchanged
+- [ ] Latency unchanged within target
+- [ ] No new warnings in logs for touched modules
+- [ ] Alerting still fires for known bad case
   
 **Example Good Commit:**
 ```
@@ -165,6 +256,12 @@ All 5 verification checks passed:
 
 ❌ **Moving code without documenting why**
 → Solution: Clear commit message explaining the refactor
+
+❌ **Refactor touches auth/DB/request lifecycle but has no rollback plan**
+→ Solution: Add rollback playbook before coding
+
+❌ **Behavior changed but refactor PR says "no functional change"**
+→ Solution: Split into 2 PRs (refactor first, behavior change later)
 
 ---
 
@@ -226,9 +323,9 @@ subprocess.run(['python', '-c', 'from server.services import SystemService; ...'
   - [x] Blueprints registered
   - [x] All imports successful
 
-- [ ] **Remove Phase**: OLD CODE STILL IN PLACE (optional - kept for backward compat)
-  - Could delete old functions from app.py if needed
-  - But keeping them doesn't hurt (routes now in blueprints)
+- [ ] **Remove Phase**: Remove old duplicate logic after parity checks
+  - Keeping duplicate old and new paths is temporary only
+  - Cleanup must be completed in follow-up commit
 
 - [x] **Final**: Created this algorithm document
   - All future refactors must follow this pattern
@@ -266,4 +363,15 @@ This took us from 393 lines in app.py to 115 lines while:
 - ✓ Improving code organization
 
 **Result: Safe, clean, audited refactoring with zero lost code.**
+
+---
+
+## DONE CRITERIA (REFRACTOR CANNOT BE CLOSED UNTIL ALL TRUE)
+
+- [ ] Mapping table complete and reviewed
+- [ ] New location code added and referenced everywhere
+- [ ] Old code removed (or cleanup ticket created with due date)
+- [ ] Unit + integration + smoke tests pass
+- [ ] Rollback path documented (mandatory for medium/high risk)
+- [ ] PR description includes scope, risks, and verification evidence
 """

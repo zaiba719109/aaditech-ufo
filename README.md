@@ -6,7 +6,9 @@
 
 ### 📊 Status Overview
 - **Vision**: 92 enterprise features (THIS DOCUMENT) ✅
-- **Currently Implemented**: 14 features (see [ARCHIVE/README_CURRENT_STATE.md](ARCHIVE/README_CURRENT_STATE.md))
+- **Current Delivery State**: Baseline monitoring platform plus Phase 1 foundation milestones now live: multi-tenant data isolation, tenant admin APIs, JWT auth, RBAC enforcement, browser session auth, and structured audit logging for core sensitive actions
+- **Current Status Details**: See [PROGRESS_TRACKER.md](PROGRESS_TRACKER.md) and [FEATURE_COVERAGE_MAP.md](FEATURE_COVERAGE_MAP.md)
+- **Historic Snapshot**: See [ARCHIVE/README_CURRENT_STATE.md](ARCHIVE/README_CURRENT_STATE.md) for the pre-Phase-1 baseline snapshot
 - **Execution Plan**: 157 features in 25 weeks (see [MASTER_ROADMAP.md](MASTER_ROADMAP.md))
 
 ### 🗺️ Navigation
@@ -450,6 +452,20 @@ simplified upgrades
 horizontal scalability
 
 Core services run as containers.
+
+Current local gateway scaffold:
+
+- `docker-compose.gateway.yml` runs the Flask app behind NGINX.
+- `gateway/nginx.conf` forwards proxy headers (`X-Forwarded-*`) and request IDs (`X-Request-ID`).
+- Gateway health endpoint is exposed at `/gateway/health`.
+
+Quick start:
+
+```bash
+docker compose -f docker-compose.gateway.yml up
+```
+
+Then access the platform through `http://localhost:8080`.
 
 Example platform services:
 

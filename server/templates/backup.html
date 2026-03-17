@@ -23,7 +23,7 @@
             <tbody>
                 {% for backup in backups %}
                 <tr>
-                    <td>{{ backup.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ backup.timestamp }}</td>
                     <td>{{ backup.size }} MB</td>
                     <td>
                         <button onclick="restoreBackup('{{ backup.filename }}')" class="btn-warning">Restore</button>

@@ -99,7 +99,7 @@
                     {{ system.last_update|ist_format }} IST
                 </td>
                 <td>
-                    <a href="{{ url_for('user_panel', serial_number=system.serial_number) }}" class="btn btn-sm btn-info">View</a>
+                    <a href="{{ url_for('web.user', serial_number=system.serial_number) }}" class="btn btn-sm btn-info">View</a>
                 </td>
             </tr>
             <tr class="detail-row">
@@ -148,6 +148,9 @@
         </tbody>
     </table>
 </div>
+{% if not system_data %}
+<div class="alert alert-info">No systems available for this tenant yet.</div>
+{% endif %}
 
 <script>
 function toggleDetails(row) {
