@@ -6,7 +6,7 @@ Shared test setup and fixtures for all tests
 import pytest
 import os
 from server.app import app
-from server.extensions import db
+from server.extensions import db, limiter
 from server.config import TestingConfig
 
 
@@ -14,7 +14,11 @@ from server.config import TestingConfig
 def app_fixture():
     """Create application for testing"""
     app.config.from_object(TestingConfig)
-    
+    # Flask-Limiter captures self.enabled at init_app() time (before TestingConfig
+    # is applied). Explicitly disable it now so per-route @limiter.limit() decorators
+    # do not fire and cause 429 errors during the full test session.
+    limiter.enabled = False
+
     with app.app_context():
         db.drop_all()
         db.create_all()

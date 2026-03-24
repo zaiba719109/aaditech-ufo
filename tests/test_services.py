@@ -23,7 +23,8 @@ class TestSystemService:
         info = service.get_system_info()
         
         assert info is not None
-        assert 'platform' in info or 'system' in info
+        # Current SystemService.get_system_info() returns these keys
+        assert 'hostname' in info or 'serial_number' in info
     
     def test_get_performance_metrics(self):
         """Test getting performance metrics"""
@@ -52,10 +53,12 @@ class TestSystemService:
     
     def test_is_active_true(self):
         """Test checking if system is active"""
-        service = SystemService()
-        is_active = service.is_active()
+        from datetime import datetime, UTC, timedelta
+        # is_active is now a static method requiring (last_update, now)
+        now = datetime.now(UTC)
+        recent_update = now - timedelta(minutes=1)
+        is_active = SystemService.is_active(recent_update, now)
         
-        # System should be active during test
         assert is_active is True
     
     def test_get_local_system_data(self):

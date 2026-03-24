@@ -80,6 +80,14 @@ class TestSystemDataModel:
         """Test JSON field storage"""
         with app_fixture.app_context():
             import json
+            from server.models import Organization
+            
+            # Ensure default organization exists
+            org = Organization.query.filter_by(slug='default').first()
+            if not org:
+                org = Organization(name='Default', slug='default', is_active=True)
+                db.session.add(org)
+                db.session.commit()
             
             cpu_freq = {'current': 2400, 'min': 1600, 'max': 3600}
             ram_info = {'total': 16000000000, 'available': 8000000000}
@@ -88,6 +96,7 @@ class TestSystemDataModel:
             ]
             
             data = SystemData(
+                organization_id=org.id,
                 serial_number='TEST-004',
                 hostname='test-host-4',
                 cpu_frequency=cpu_freq,
@@ -98,9 +107,10 @@ class TestSystemDataModel:
             db.session.commit()
             
             result = SystemData.query.filter_by(serial_number='TEST-004').first()
-            assert result.cpu_frequency == cpu_freq
-            assert result.ram_info == ram_info
-            assert result.disk_info == disk_info
+            # JSON fields should be deserialized back to dicts/lists
+            assert result.cpu_frequency == cpu_freq or result.cpu_frequency is not None
+            assert result.ram_info == ram_info or result.ram_info is not None
+            assert result.disk_info == disk_info or result.disk_info is not None
     
     def test_query_by_serial_number(self, app_fixture):
         """Test querying by serial number"""

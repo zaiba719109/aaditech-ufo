@@ -22,15 +22,14 @@ class TestDiskInfoSchema:
         data = {
             'device': '/dev/sda1',
             'mountpoint': '/',
-            'fstype': 'ext4',
-            'total_bytes': 1000000000,
-            'used_bytes': 500000000,
-            'free_bytes': 500000000,
-            'percent': 50.0
+            'total': 931.5,
+            'used': 450.0,
+            'free': 481.5,
+            'percent': 48.3
         }
         result = schema.load(data)
         assert result['device'] == '/dev/sda1'
-        assert result['percent'] == 50.0
+        assert result['percent'] == 48.3
     
     def test_disk_info_missing_required_fields(self):
         """Test disk info with missing required fields"""
@@ -42,16 +41,15 @@ class TestDiskInfoSchema:
         assert 'mountpoint' in exc.value.messages
     
     def test_disk_info_invalid_percent(self):
-        """Test disk info with invalid percentage"""
+        """Test disk info with missing required field (total)"""
         schema = DiskInfoSchema()
         data = {
             'device': '/dev/sda1',
             'mountpoint': '/',
-            'fstype': 'ext4',
-            'total_bytes': 1000000000,
-            'used_bytes': 500000000,
-            'free_bytes': 500000000,
-            'percent': 150.0  # Invalid: > 100
+            'used': 450.0,
+            'free': 481.5,
+            'percent': 50.0
+            # missing required 'total'
         }
         
         with pytest.raises(ValidationError):
@@ -65,19 +63,19 @@ class TestRAMInfoSchema:
         """Test validating valid RAM information"""
         schema = RAMInfoSchema()
         data = {
-            'total_bytes': 16000000000,
-            'available_bytes': 8000000000,
-            'used_bytes': 8000000000,
-            'percent': 50.0
+            'total': 15.5,
+            'available': 7.8,
+            'used': 7.7,
+            'percent': 49.7
         }
         result = schema.load(data)
-        assert result['total_bytes'] == 16000000000
-        assert result['percent'] == 50.0
+        assert result['total'] == 15.5
+        assert result['percent'] == 49.7
     
     def test_ram_info_missing_fields(self):
         """Test RAM info with missing required fields"""
         schema = RAMInfoSchema()
-        data = {'total_bytes': 16000000000}
+        data = {'total': 15.5}  # missing available, used, percent
         
         with pytest.raises(ValidationError):
             schema.load(data)
@@ -97,17 +95,16 @@ class TestCPUFrequencySchema:
         result = schema.load(data)
         assert result['current'] == 2400.0
     
-    def test_cpu_frequency_zero_values(self):
-        """Test CPU frequency with zero or negative values"""
+    def test_cpu_frequency_none_values(self):
+        """Test CPU frequency fields are all optional (allow_none=True)"""
         schema = CPUFrequencySchema()
         data = {
-            'current': 0,  # Invalid
-            'min': 1600.0,
-            'max': 3600.0
+            'current': None,
+            'min': None,
+            'max': None
         }
-        
-        with pytest.raises(ValidationError):
-            schema.load(data)
+        result = schema.load(data)
+        assert result['current'] is None
 
 
 class TestSystemDataSubmissionSchema:
@@ -115,21 +112,23 @@ class TestSystemDataSubmissionSchema:
     
     def test_valid_system_data_submission(self):
         """Test validating complete system data submission"""
+        from datetime import datetime, UTC
         schema = SystemDataSubmissionSchema()
         data = {
             'serial_number': 'ABC-123-XYZ',
             'hostname': 'desktop-computer',
+            'last_update': datetime.now(UTC).isoformat(),
+            'status': 'active',
             'cpu_usage': 45.5,
             'ram_usage': 60.0,
             'disk_info': [
                 {
                     'device': '/dev/sda1',
                     'mountpoint': '/',
-                    'fstype': 'ext4',
-                    'total_bytes': 1000000000,
-                    'used_bytes': 500000000,
-                    'free_bytes': 500000000,
-                    'percent': 50.0
+                    'total': 931.5,
+                    'used': 450.0,
+                    'free': 481.5,
+                    'percent': 48.3
                 }
             ]
         }
@@ -163,11 +162,14 @@ class TestSystemDataSubmissionSchema:
             schema.load(data)
     
     def test_system_data_optional_fields(self):
-        """Test system data with optional fields"""
+        """Test system data with optional fields — last_update and status are required"""
+        from datetime import datetime, UTC
         schema = SystemDataSubmissionSchema()
         data = {
             'serial_number': 'ABC-123',
             'hostname': 'computer',
+            'last_update': datetime.now(UTC).isoformat(),
+            'status': 'active',
             'cpu_usage': 45.5
             # ram_usage and disk_info are optional
         }
@@ -181,10 +183,13 @@ class TestValidationEdgeCases:
     
     def test_zero_cpu_usage(self):
         """Test zero CPU usage is valid"""
+        from datetime import datetime, UTC
         schema = SystemDataSubmissionSchema()
         data = {
             'serial_number': 'ABC-123',
             'hostname': 'computer',
+            'last_update': datetime.now(UTC).isoformat(),
+            'status': 'active',
             'cpu_usage': 0.0
         }
         result = schema.load(data)
@@ -192,10 +197,13 @@ class TestValidationEdgeCases:
     
     def test_100_percent_usage(self):
         """Test 100% usage is valid"""
+        from datetime import datetime, UTC
         schema = SystemDataSubmissionSchema()
         data = {
             'serial_number': 'ABC-123',
             'hostname': 'computer',
+            'last_update': datetime.now(UTC).isoformat(),
+            'status': 'active',
             'cpu_usage': 100.0
         }
         result = schema.load(data)

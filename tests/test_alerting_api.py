@@ -127,7 +127,7 @@ def test_evaluate_alert_rules_returns_triggered_alerts(client, app_fixture):
         db.session.add(system_row)
         db.session.commit()
 
-    evaluate = client.post('/api/alerts/evaluate', headers=_headers())
+    evaluate = client.post('/api/alerts/evaluate', headers=_headers(), json={'apply_silences': False})
     assert evaluate.status_code == 200
     payload = evaluate.get_json()
 
@@ -139,7 +139,12 @@ def test_evaluate_alert_rules_returns_triggered_alerts(client, app_fixture):
 
 def test_evaluate_alert_rules_returns_anomaly_alerts(client, app_fixture):
     with app_fixture.app_context():
+        # Ensure default tenant exists
         tenant = Organization.query.filter_by(slug='default').first()
+        if tenant is None:
+            tenant = Organization(name='Default Organization', slug='default', is_active=True)
+            db.session.add(tenant)
+            db.session.commit()
         assert tenant is not None
 
         for i in range(10):
@@ -179,6 +184,7 @@ def test_evaluate_alert_rules_returns_anomaly_alerts(client, app_fixture):
             'anomaly_z_score_threshold': 2.0,
             'anomaly_min_samples': 5,
             'anomaly_window_size': 20,
+            'apply_silences': False,
         },
     )
     assert evaluate.status_code == 200
@@ -236,7 +242,7 @@ def test_evaluate_alert_rules_returns_correlated_alert_groups(client, app_fixtur
     evaluate = client.post(
         '/api/alerts/evaluate',
         headers=_headers(),
-        json={'include_anomaly_alerts': False, 'include_correlation': True},
+        json={'include_anomaly_alerts': False, 'include_correlation': True, 'apply_silences': False},
     )
     assert evaluate.status_code == 200
     payload = evaluate.get_json()
