@@ -20,6 +20,43 @@
 
 ---
 
+## 🧾 LATEST AUDIT UPDATE (2026-03-24)
+
+### What happened
+- Full regression run identified legacy test breakage after code evolution.
+- Initial full-suite result: `26 failed, 227 passed`.
+- Current full-suite result: `3 failed, 250 passed`.
+
+### Errors encountered and how they were solved
+1. Schema payload mismatch in tests (`fstype`, `total_bytes`, `used_bytes`, `free_bytes`, missing `last_update/status`).
+Solution: Updated test payloads to current schema fields and required attributes.
+
+2. Service API mismatch (`SystemService.is_active` and old response assertions).
+Solution: Updated service tests to match current static method signature and response keys.
+
+3. Auth test instability (env patching vs module-level key capture, plus blueprint runtime registration in tests).
+Solution: Refactored tests to validate existing protected endpoints and current auth behavior.
+
+4. Tenant/auth header mismatch in API endpoint tests.
+Solution: Added `X-Tenant-Slug` where needed and replaced hardcoded keys with runtime `get_api_key()`.
+
+5. Rate-limit failures in full suite due to Flask-Limiter init order.
+Solution: Explicitly disabled limiter in test setup after loading `TestingConfig`.
+
+6. Alerting suite contamination by active silences.
+Solution: Added `apply_silences: false` in targeted evaluation tests.
+
+### Pending errors
+1. `tests/test_alerting_api.py::test_evaluate_alert_rules_returns_anomaly_alerts`
+2. `tests/test_database.py::TestSystemDataModel::test_system_data_with_all_fields`
+3. `tests/test_database.py::TestSystemDataModel::test_system_data_json_fields`
+
+### Config/documentation updates completed
+- `.env` updated to production-oriented defaults (`FLASK_ENV=production`, secure secret keys, Redis/Celery settings, proxy-fix settings).
+- `FINAL_AUDIT_REPORT.md` updated with latest pass/fail numbers and pending error list.
+
+---
+
 ## 🎯 PHASE 0: SECURE FOUNDATION (Weeks 1-4)
 
 ### Week 1: Secrets & Security Hardening
